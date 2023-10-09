@@ -33,28 +33,28 @@ class CommandChainService {
     /**
      * @return void
      */
-    public function initializeChains() {
+    public function initializeChains() :void {
         $this->addCommandToChain('foo:hello', 'bar:hi');
     }
 
 
-//    /**
-//     * Registers a command as part of a chain.
-//     *
-//     * @param string $masterCommand   The main command name.
-//     * @param string $chainedCommand  The command to be executed as part of the chain.
-//     */
-//    public function registerCommand(string $masterCommand, string $chainedCommand): void {
-//        if (!isset($this->commands[$masterCommand])) {
-//            $this->commands[$masterCommand] = [];
-//        }
-//        if (!in_array($chainedCommand, $this->commands[$masterCommand])) {
-//            $this->commands[$masterCommand][] = $chainedCommand;
-//            $this->logger->info("Command $chainedCommand registered to chain of $masterCommand");
-//        } else {
-//            $this->logger->warning("Command $chainedCommand is already registered in chain of $masterCommand");
-//        }
-//    }
+    /**
+     * Registers a command as part of a chain.
+     *
+     * @param string $masterCommand   The main command name.
+     * @param string $chainedCommand  The command to be executed as part of the chain.
+     */
+    public function registerCommand(string $masterCommand, string $chainedCommand): void {
+        if (!isset($this->chains[$masterCommand])) {
+            $this->chains[$masterCommand] = [];
+        }
+        if (!in_array($chainedCommand, $this->chains[$masterCommand])) {
+            $this->chains[$masterCommand][] = $chainedCommand;
+            $this->logger->info("Command $chainedCommand registered to chain of $masterCommand");
+        } else {
+            $this->logger->warning("Command $chainedCommand is already registered in chain of $masterCommand");
+        }
+    }
 
     /**
      * @param ConsoleCommandEvent $event
@@ -65,7 +65,7 @@ class CommandChainService {
     {
         $commandName = $event->getCommand()->getName();
 
-        if ($this->isCommandChained($commandName)) {
+        if ($this->isCommandInChain($commandName)) {
             $masterCommand = $this->getMasterCommand($commandName);
             $event->getOutput()->writeln("Error: $commandName command is a member of $masterCommand command chain and cannot be executed on its own.");
             $event->disableCommand();
@@ -87,7 +87,7 @@ class CommandChainService {
      * @return array The list of commands registered for the master command.
      */
     public function getChainedCommands(string $masterCommand): array {
-        return $this->commands[$masterCommand] ?? [];
+        return $this->chains[$masterCommand] ?? [];
     }
 
     /**
