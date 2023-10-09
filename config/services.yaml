@@ -31,6 +31,7 @@ services:
             $logger: '@logger'
         tags:
             - { name: 'kernel.event_listener', event: 'console.command', method: 'onConsoleCommand' }
+            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest' }
 
     App\FooBundle\Service\CommandChainManager:
         arguments:
@@ -38,12 +39,5 @@ services:
 
     App\BarBundle\Command\BarHiCommand:
         arguments:
-            $chainCommandManager: '@ChainCommandBundle\Service\ChainCommandManager'
+            $chainCommandManager: '@App\FooBundle\Service\CommandChainManager'
             $logger: '@monolog.logger.command_chain'
-        tags:
-            - { name: 'console.command', event: 'console.command', method: 'onConsoleCommand'  }
-    App\EventListener\CommandChainInitializer:
-        arguments:
-            $commandChainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
-        tags:
-            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest' }

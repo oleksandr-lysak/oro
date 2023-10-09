@@ -94,7 +94,7 @@ class CommandChainService {
      * @param string $command
      * @return bool
      */
-    public function isCommandChained(string $command): bool
+    public function isCommandInChain(string $command): bool
     {
         foreach ($this->chains as $master => $chainedCommands) {
             if (in_array($command, $chainedCommands)) {
@@ -116,5 +116,16 @@ class CommandChainService {
             }
         }
         return null;
+    }
+
+    /**
+     * Check if the given command name is a master command in any chain.
+     *
+     * @param string $commandName
+     * @return bool
+     */
+    public function isMasterCommand(string $commandName): bool
+    {
+        return isset($this->commandChains[$commandName]);
     }
 }

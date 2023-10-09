@@ -8,6 +8,8 @@ use Symfony\Component\Console\Exception\ExceptionInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 
+
+
 /**
  * Listener responsible for executing command chains.
  */
@@ -15,11 +17,11 @@ class CommandChainListener {
     private CommandChainService $commandChainService;
     private LoggerInterface $logger;
 
+
+
     /**
-     * CommandChainListener constructor.
-     *
-     * @param CommandChainService $commandChainService The command chain service.
-     * @param $logger LoggerInterface The logger service.
+     * @param CommandChainService $commandChainService
+     * @param LoggerInterface $logger
      */
     public function __construct(CommandChainService $commandChainService, LoggerInterface $logger) {
         $this->commandChainService = $commandChainService;
@@ -60,11 +62,26 @@ class CommandChainListener {
                 $this->logger->error("Error executing chained command: $chainedCommand. Error: " . $e->getMessage());
             }
         }
+        // if command in chain
+        if ($this->commandChainService->isCommandInChain($commandName)) {
+            $event->disableCommand();
+            $this->logger->error(sprintf('Error: %s command is a member of %s command chain and cannot be executed on its own.', $commandName, $this->commandChainService->getMasterCommand($commandName)));
+            return;
+        }
+
+        // if command is master command of chain
+        if ($this->commandChainService->isMasterCommand($commandName)) {
+            // Execute all command after master command
+            $chainCommands = $this->commandChainService->getChainedCommands($commandName);
+            foreach ($chainCommands as $chainCommand) {
+                $this->application->find($chainCommand)->run($event->getInput(), $event->getOutput());
+            }
+        }
 
         $this->logger->info("Execution of $commandName chain completed");
     }
 
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(RequestEvent $event) :void
     {
         $this->commandChainService->initializeChains();
     }
