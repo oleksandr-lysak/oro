@@ -1,0 +1,8 @@
+monolog:
+  channels: ["command_chain"]
+  handlers:
+    command_chain:
+      type: stream
+      path: "%kernel.logs_dir%/command_chain.log"
+      level: debug
+      channels: ["command_chain"]

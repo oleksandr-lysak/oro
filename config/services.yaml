@@ -22,3 +22,28 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\ChainCommandBundle\Service\CommandChainService:
+        arguments:
+            $logger: '@monolog.logger.command_chain'
+    App\ChainCommandBundle\EventListener\CommandChainListener:
+        arguments:
+            $commandChainService: '@App\ChainCommandBundle\Service\CommandChainService'
+            $logger: '@logger'
+        tags:
+            - { name: 'kernel.event_listener', event: 'console.command', method: 'onConsoleCommand' }
+
+    App\FooBundle\Service\CommandChainManager:
+        arguments:
+            $logger: '@monolog.logger.command_chain'
+
+    App\BarBundle\Command\BarHiCommand:
+        arguments:
+            $chainCommandManager: '@ChainCommandBundle\Service\ChainCommandManager'
+            $logger: '@monolog.logger.command_chain'
+        tags:
+            - { name: 'console.command', event: 'console.command', method: 'onConsoleCommand'  }
+    App\EventListener\CommandChainInitializer:
+        arguments:
+            $commandChainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest' }
