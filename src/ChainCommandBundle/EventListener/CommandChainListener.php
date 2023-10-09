@@ -2,6 +2,7 @@
 namespace App\ChainCommandBundle\EventListener;
 
 use App\ChainCommandBundle\Service\CommandChainService;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Exception\ExceptionInterface;
@@ -16,16 +17,18 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 class CommandChainListener {
     private CommandChainService $commandChainService;
     private LoggerInterface $logger;
-
+    private Application $application;
 
 
     /**
      * @param CommandChainService $commandChainService
      * @param LoggerInterface $logger
+     * @param Application $application
      */
-    public function __construct(CommandChainService $commandChainService, LoggerInterface $logger) {
+    public function __construct(CommandChainService $commandChainService, LoggerInterface $logger, Application $application) {
         $this->commandChainService = $commandChainService;
         $this->logger = $logger;
+        $this->application = $application;
     }
 
     /**
