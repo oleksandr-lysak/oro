@@ -16,11 +16,13 @@ class CommandChainManager
 
     public function addCommandToChain(string $mainCommandName, Command $chainedCommand): void
     {
+
         if (!isset($this->commandChains[$mainCommandName])) {
             $this->commandChains[$mainCommandName] = [];
         }
 
         $this->commandChains[$mainCommandName][] = $chainedCommand;
+
     }
 
     public function getChainedCommands(string $mainCommandName): array
