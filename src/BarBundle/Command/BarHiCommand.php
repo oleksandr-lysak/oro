@@ -2,37 +2,51 @@
 
 namespace App\BarBundle\Command;
 
+use App\ChainCommandBundle\Interface\CommandChainerInterface;
 use App\ChainCommandBundle\Service\CommandChainManager;
+use App\FooBundle\Command\FooHelloCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Psr\Log\LoggerInterface;
+use App\ChainCommandBundle\Traits\CommandChainingTrait;
 
 /**
  * Class BarHiCommand
  * @package BarBundle\Command
  */
-class BarHiCommand extends Command
+class BarHiCommand extends Command implements CommandChainerInterface
 {
-    protected static $defaultName = 'bar:hi';
-    private CommandChainManager $commandChainManager;
+    use CommandChainingTrait;
+
+
+
 
     /**
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
-    public function __construct(CommandChainManager $chainCommandManager, LoggerInterface $logger)
+    private CommandChainManager $chainManager;
+
+    protected function registerMasterCommand(string $commandName): void
+    {
+        // Store the master command name for the current command
+        self::$executedCommands[static::class] = $commandName;
+    }
+
+    public function __construct(LoggerInterface $logger,CommandChainManager $chainManager)
     {
         parent::__construct();
         $this->logger = $logger;
-        $this->commandChainManager = $chainCommandManager;
+        $this->chainManager = $chainManager;
 
     }
 
     protected function configure(): void
     {
-        $this->setDescription('Hi from Bar!');
+        $this->setName('bar:hi')->setDescription('Hi from Bar!');
+        $this->registerMasterCommand(FooHelloCommand::class);
     }
 
     /**
@@ -42,13 +56,28 @@ class BarHiCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($this->commandChainManager->isCommandChained(self::$defaultName)) {
-            $output->writeln('Error: bar:hi command is a member of foo:hello command chain and cannot be executed on its own.');
+        if (!$this->wasMasterCommandExecuted()) {
+            $output->writeln('Error: You need to run foo:hello first.');
             return Command::FAILURE;
         }
 
+        // Mark the current command as executed
+        self::markCommandAsExecuted($this->getName());
+
+        // Rest of your command logic
         $output->writeln('Hi from Bar!');
-        $this->logger->info('Hi from Bar!');
         return Command::SUCCESS;
+    }
+
+    public function addCommandToChain(string $mainCommandName, Command $chainedCommand): void
+    {
+        $this->chainManager->addCommandToChain($mainCommandName, $chainedCommand);
+
+    }
+
+    public function getChainedCommands(string $mainCommandName): array
+    {
+        //return ['foo:hello'];
+        return $this->chainManager->getChainedCommands($mainCommandName);
     }
 }

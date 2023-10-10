@@ -22,21 +22,34 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App\ChainCommandBundle\Service\CommandChainService:
+    # Logger service
+    Psr\Log\LoggerInterface:
+        class: Monolog\Logger
         arguments:
-            $logger: '@monolog.logger.command_chain'
+            $name: 'app'
+            $handlers: [ '@monolog.handler' ]
+
+    monolog.handler:
+        class: Monolog\Handler\StreamHandler
+        arguments:
+            $stream: '%kernel.logs_dir%/%kernel.environment%.log'
+            $level: !php/const Monolog\Logger::DEBUG
+
+    App\ChainCommandBundle\Service\CommandChainer:
+        arguments: [ ]
     App\ChainCommandBundle\EventListener\CommandChainListener:
         arguments:
-            $commandChainService: '@App\ChainCommandBundle\Service\CommandChainService'
-            $logger: '@logger'
+            $logger: '@Psr\Log\LoggerInterface'
+            $commandChainer: '@App\ChainCommandBundle\Service\CommandChainer'
         tags:
             - { name: 'kernel.event_listener', event: 'console.command', method: 'onConsoleCommand' }
+            - { name: 'kernel.event_listener', event: 'console.terminate', method: 'onConsoleTerminate' }
 
-    App\FooBundle\Service\CommandChainManager:
+    # FooBundle services
+    App\FooBundle\Command\FooHelloCommand:
         arguments:
-            $logger: '@monolog.logger.command_chain'
-
+            $logger: '@Psr\Log\LoggerInterface'
+    # BarBundle services
     App\BarBundle\Command\BarHiCommand:
         arguments:
-            $chainCommandManager: '@App\FooBundle\Service\CommandChainManager'
-            $logger: '@monolog.logger.command_chain'
+            $logger: '@Psr\Log\LoggerInterface'
