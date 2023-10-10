@@ -27,6 +27,8 @@ class CommandChainListener
     {
         $this->logger = $logger;
         $this->chainManager = $chainManager;
+        echo 'CommandChainListener CommandChainManager ID: ' . spl_object_id($this->chainManager) . PHP_EOL;
+
     }
 
     /**

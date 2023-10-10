@@ -37,6 +37,8 @@ class BarHiCommand extends Command implements CommandChainerInterface
         parent::__construct();
         $this->logger = $logger;
         $this->chainManager = $chainManager;
+        echo 'BarHiCommand CommandChainManager ID: ' . spl_object_id($this->chainManager) . PHP_EOL;
+
         $this->registerMasterCommand(FooHelloCommand::class);
     }
 
