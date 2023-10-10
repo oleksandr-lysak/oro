@@ -35,8 +35,11 @@ services:
             $stream: '%kernel.logs_dir%/%kernel.environment%.log'
             $level: !php/const Monolog\Logger::DEBUG
 
-    App\ChainCommandBundle\Service\CommandChainer:
-        arguments: [ ]
+    App\ChainCommandBundle\Service\CommandChainManager:
+        arguments:
+            $logger: '@Psr\Log\LoggerInterface'
+        public: true
+        shared: true
     App\ChainCommandBundle\EventListener\CommandChainListener:
         arguments:
             $logger: '@Psr\Log\LoggerInterface'

@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
  */
 class CommandChainListener
 {
-    private $commandChainer;
+    private $chainManager;
     /**
      * @var LoggerInterface
      */
@@ -26,7 +26,7 @@ class CommandChainListener
     public function __construct(LoggerInterface $logger,CommandChainManager $chainManager)
     {
         $this->logger = $logger;
-        $this->commandChainer = $chainManager;
+        $this->chainManager = $chainManager;
     }
 
     /**
@@ -54,9 +54,8 @@ class CommandChainListener
      */
     public function onConsoleTerminate(ConsoleTerminateEvent $event): void
     {
-
         $commandName = $event->getCommand()->getName();
-        $chainedCommands = $this->commandChainer->getChainedCommands($commandName);
+        $chainedCommands = $this->chainManager->getChainedCommands($commandName);
 
         foreach ($chainedCommands as $chainedCommand) {
             $chainedCommand->run($event->getInput(), $event->getOutput());
