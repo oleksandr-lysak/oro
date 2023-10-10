@@ -3,6 +3,7 @@ namespace App\FooBundle\Command;
 
 use App\ChainCommandBundle\Interface\CommandChainerInterface;
 use App\ChainCommandBundle\Service\CommandChainManager;
+use App\ChainCommandBundle\Service\ExecutedCommandsRegistry;
 use App\ChainCommandBundle\Traits\CommandChainingTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,11 +17,14 @@ use Psr\Log\LoggerInterface;
 class FooHelloCommand extends Command implements CommandChainerInterface
 {
     use CommandChainingTrait;
+
+    protected static $defaultName = 'foo:hello';
     /**
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
+    private $registry;
     private CommandChainManager $chainManager;
     /**
      * FooHelloCommand constructor.
@@ -28,11 +32,12 @@ class FooHelloCommand extends Command implements CommandChainerInterface
      * @param LoggerInterface $logger
      * @param CommandChainManager $chainManager
      */
-    public function __construct(LoggerInterface $logger,CommandChainManager $chainManager)
+    public function __construct(LoggerInterface $logger,CommandChainManager $chainManager,ExecutedCommandsRegistry $registry)
     {
         parent::__construct();
         $this->logger = $logger;
         $this->chainManager = $chainManager;
+        $this->registry = $registry;
     }
 
     /**
@@ -41,7 +46,7 @@ class FooHelloCommand extends Command implements CommandChainerInterface
     protected function configure() :void
     {
         $this
-            ->setName('foo:hello')
+            ->setName($this::$defaultName)
             ->setDescription('Outputs a greeting message.')
             ->setHelp('This command allows you to output a greeting message...');
     }
@@ -58,6 +63,8 @@ class FooHelloCommand extends Command implements CommandChainerInterface
         $message = 'Hello from Foo!';
         $output->writeln($message);
         $this->logger->info(sprintf('Executed command %s: %s', $this->getName(), $message));
+
+        $this->registry->markCommandAsExecuted($this->getName());
 
         return Command::SUCCESS;
     }

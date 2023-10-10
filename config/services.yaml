@@ -40,6 +40,9 @@ services:
             $logger: '@Psr\Log\LoggerInterface'
         public: true
         shared: true
+    App\ChainCommandBundle\Service\ExecutedCommandsRegistry:
+        public: true
+        shared: true
     App\ChainCommandBundle\EventListener\CommandChainListener:
         arguments:
             $logger: '@Psr\Log\LoggerInterface'
@@ -52,8 +55,10 @@ services:
     App\FooBundle\Command\FooHelloCommand:
         arguments:
             $logger: '@Psr\Log\LoggerInterface'
+            $registry: '@App\ChainCommandBundle\Service\ExecutedCommandsRegistry'
     # BarBundle services
     App\BarBundle\Command\BarHiCommand:
         arguments:
             $logger: '@Psr\Log\LoggerInterface'
             $chainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
+            $registry: '@App\ChainCommandBundle\Service\ExecutedCommandsRegistry'

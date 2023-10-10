@@ -27,8 +27,6 @@ class CommandChainListener
     {
         $this->logger = $logger;
         $this->chainManager = $chainManager;
-        echo 'CommandChainListener CommandChainManager ID: ' . spl_object_id($this->chainManager) . PHP_EOL;
-
     }
 
     /**
@@ -57,6 +55,7 @@ class CommandChainListener
     public function onConsoleTerminate(ConsoleTerminateEvent $event): void
     {
         $commandName = $event->getCommand()->getName();
+        $commandName = get_class($event->getCommand());
         $chainedCommands = $this->chainManager->getChainedCommands($commandName);
 
         foreach ($chainedCommands as $chainedCommand) {

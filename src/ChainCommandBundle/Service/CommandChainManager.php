@@ -17,20 +17,16 @@ class CommandChainManager
 
     public function addCommandToChain(string $mainCommandName, Command $chainedCommand): void
     {
+
         if (!isset($this->commandChains[$mainCommandName])) {
             $this->commandChains[$mainCommandName] = [];
+
         }
-
         $this->commandChains[$mainCommandName][] = $chainedCommand;
-        echo 'Adding command to chain: ' . $chainedCommand->getName() . ' for master command: ' . $mainCommandName . PHP_EOL;
-
     }
 
     public function getChainedCommands(string $mainCommandName): array
     {
-        echo 'Getting chained commands for master command: ' . $mainCommandName . PHP_EOL;
-        //print_r($this->commandChains);
-
         $commands = $this->commandChains[$mainCommandName] ?? [];
         foreach ($commands as $command) {
             $this->logger->info(sprintf('Chained command for %s: %s', $mainCommandName, $command->getName()));

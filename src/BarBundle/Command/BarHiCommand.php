@@ -4,6 +4,7 @@ namespace App\BarBundle\Command;
 
 use App\ChainCommandBundle\Interface\CommandChainerInterface;
 use App\ChainCommandBundle\Service\CommandChainManager;
+use App\ChainCommandBundle\Service\ExecutedCommandsRegistry;
 use App\FooBundle\Command\FooHelloCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,6 +25,10 @@ class BarHiCommand extends Command implements CommandChainerInterface
      */
     private LoggerInterface $logger;
 
+    protected static $defaultName = 'bar:hi';
+
+    private $registry;
+
     private $chainManager;
 
     protected function registerMasterCommand(string $commandName): void
@@ -32,19 +37,19 @@ class BarHiCommand extends Command implements CommandChainerInterface
         $this->chainManager->addCommandToChain($commandName, $this);
     }
 
-    public function __construct(LoggerInterface $logger,CommandChainManager $chainManager)
+    public function __construct(LoggerInterface $logger,CommandChainManager $chainManager,ExecutedCommandsRegistry $registry)
     {
         parent::__construct();
         $this->logger = $logger;
         $this->chainManager = $chainManager;
-        echo 'BarHiCommand CommandChainManager ID: ' . spl_object_id($this->chainManager) . PHP_EOL;
+        $this->registry = $registry;
 
         $this->registerMasterCommand(FooHelloCommand::class);
     }
 
     protected function configure(): void
     {
-        $this->setName('bar:hi')->setDescription('Hi from Bar!');
+        $this->setName($this::$defaultName)->setDescription('Hi from Bar!');
 
     }
 
@@ -55,15 +60,11 @@ class BarHiCommand extends Command implements CommandChainerInterface
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$this->wasMasterCommandExecuted()) {
+        if (!$this->registry->wasCommandExecuted(FooHelloCommand::getDefaultName())) {
             $output->writeln('Error: You need to run foo:hello first.');
             return Command::FAILURE;
         }
 
-        // Mark the current command as executed
-        self::markCommandAsExecuted($this->getName());
-
-        // Rest of your command logic
         $output->writeln('Hi from Bar!');
         return Command::SUCCESS;
     }
