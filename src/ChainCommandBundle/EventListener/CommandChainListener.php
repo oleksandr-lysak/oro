@@ -2,6 +2,7 @@
 namespace App\ChainCommandBundle\EventListener;
 
 use App\ChainCommandBundle\Interface\CommandChainerInterface;
+use App\ChainCommandBundle\Service\CommandChainManager;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Psr\Log\LoggerInterface;
@@ -22,10 +23,10 @@ class CommandChainListener
      *
      * @param LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger,CommandChainerInterface $commandChainer)
+    public function __construct(LoggerInterface $logger,CommandChainManager $chainManager)
     {
         $this->logger = $logger;
-        $this->commandChainer = $commandChainer;
+        $this->commandChainer = $chainManager;
     }
 
     /**
@@ -53,6 +54,7 @@ class CommandChainListener
      */
     public function onConsoleTerminate(ConsoleTerminateEvent $event): void
     {
+
         $commandName = $event->getCommand()->getName();
         $chainedCommands = $this->commandChainer->getChainedCommands($commandName);
 

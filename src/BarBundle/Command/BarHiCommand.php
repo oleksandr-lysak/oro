@@ -19,20 +19,17 @@ class BarHiCommand extends Command implements CommandChainerInterface
 {
     use CommandChainingTrait;
 
-
-
-
     /**
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
-    private CommandChainManager $chainManager;
+    private $chainManager;
 
     protected function registerMasterCommand(string $commandName): void
     {
         // Store the master command name for the current command
-        self::$executedCommands[static::class] = $commandName;
+        $this->chainManager->addCommandToChain($commandName, $this);
     }
 
     public function __construct(LoggerInterface $logger,CommandChainManager $chainManager)
@@ -40,13 +37,13 @@ class BarHiCommand extends Command implements CommandChainerInterface
         parent::__construct();
         $this->logger = $logger;
         $this->chainManager = $chainManager;
-
+        $this->registerMasterCommand(FooHelloCommand::class);
     }
 
     protected function configure(): void
     {
         $this->setName('bar:hi')->setDescription('Hi from Bar!');
-        $this->registerMasterCommand(FooHelloCommand::class);
+
     }
 
     /**

@@ -40,7 +40,7 @@ services:
     App\ChainCommandBundle\EventListener\CommandChainListener:
         arguments:
             $logger: '@Psr\Log\LoggerInterface'
-            $commandChainer: '@App\ChainCommandBundle\Service\CommandChainer'
+            $chainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
         tags:
             - { name: 'kernel.event_listener', event: 'console.command', method: 'onConsoleCommand' }
             - { name: 'kernel.event_listener', event: 'console.terminate', method: 'onConsoleTerminate' }
@@ -53,3 +53,4 @@ services:
     App\BarBundle\Command\BarHiCommand:
         arguments:
             $logger: '@Psr\Log\LoggerInterface'
+            $chainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
