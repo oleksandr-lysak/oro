@@ -2,7 +2,6 @@
 
 namespace App\BarBundle\Command;
 
-use App\ChainCommandBundle\Interface\CommandChainerInterface;
 use App\ChainCommandBundle\Service\CommandChainManager;
 use App\ChainCommandBundle\Service\ExecutedCommandsRegistry;
 use App\FooBundle\Command\FooHelloCommand;
@@ -14,29 +13,54 @@ use App\ChainCommandBundle\Traits\CommandChainingTrait;
 
 /**
  * Class BarHiCommand
+ *
+ * This class represents a command that outputs a greeting from the Bar bundle.
+ * It is part of a chain of commands and should be executed after the FooHelloCommand.
+ *
  * @package BarBundle\Command
  */
-class BarHiCommand extends Command implements CommandChainerInterface
+class BarHiCommand extends Command
 {
     use CommandChainingTrait;
+
+    /**
+     * @var string
+     */
+    private static string $commandName = 'bar:hi';
 
     /**
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
+    /**
+     * @var ExecutedCommandsRegistry
+     */
+    private ExecutedCommandsRegistry $registry;
 
+    /**
+     * @var CommandChainManager
+     */
+    private CommandChainManager $chainManager;
 
-    private $registry;
-
-    private $chainManager;
-
-    protected function registerMasterCommand(string $commandName): void
+    /**
+     * Registers the master command for the current command.
+     *
+     * @param string $className The name of the master command class.
+     * @param string $commandName The name of the master command.
+     */
+    protected function registerMasterCommand(string $className, string $commandName): void
     {
-        // Store the master command name for the current command
-        $this->chainManager->addCommandToChain($commandName, $this);
+        $this->chainManager->addCommandToChain($className, $commandName, $this);
     }
 
+    /**
+     * Constructor for the BarHiCommand class.
+     *
+     * @param LoggerInterface $logger Logger service.
+     * @param CommandChainManager $chainManager Manages command chains.
+     * @param ExecutedCommandsRegistry $registry Keeps track of executed commands.
+     */
     public function __construct(LoggerInterface $logger,CommandChainManager $chainManager,ExecutedCommandsRegistry $registry)
     {
         parent::__construct();
@@ -44,19 +68,24 @@ class BarHiCommand extends Command implements CommandChainerInterface
         $this->chainManager = $chainManager;
         $this->registry = $registry;
 
-        $this->registerMasterCommand(FooHelloCommand::class);
-    }
-
-    protected function configure(): void
-    {
-        $this->setName('bar:hi')->setDescription('Hi from Bar!');
+        $this->registerMasterCommand(FooHelloCommand::class,FooHelloCommand::getDefaultName());
 
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
+     * Configures the command.
+     */
+    protected function configure(): void
+    {
+        $this->setName($this::$commandName)->setDescription('Hi from Bar!');
+    }
+
+    /**
+     * Executes the command.
+     *
+     * @param InputInterface $input Input interface.
+     * @param OutputInterface $output Output interface.
+     * @return int Command exit status.
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -69,15 +98,4 @@ class BarHiCommand extends Command implements CommandChainerInterface
         return Command::SUCCESS;
     }
 
-    public function addCommandToChain(string $mainCommandName, Command $chainedCommand): void
-    {
-        $this->chainManager->addCommandToChain($mainCommandName, $chainedCommand);
-
-    }
-
-    public function getChainedCommands(string $mainCommandName): array
-    {
-        //return ['foo:hello'];
-        return $this->chainManager->getChainedCommands($mainCommandName);
-    }
 }

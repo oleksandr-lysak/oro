@@ -6,3 +6,4 @@ monolog:
       path: "%kernel.logs_dir%/command_chain.log"
       level: debug
       channels: ["command_chain"]
+      formatter: app.monolog_line_formatter

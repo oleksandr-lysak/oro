@@ -28,6 +28,11 @@ services:
         arguments:
             $name: 'app'
             $handlers: [ '@monolog.handler' ]
+    app.monolog_line_formatter:
+        class: Monolog\Formatter\LineFormatter
+        arguments:
+            $format: "[%%datetime%%] %%message%%\n"
+            $dateFormat: "Y-m-d H:i:s"
 
     monolog.handler:
         class: Monolog\Handler\StreamHandler
@@ -37,7 +42,7 @@ services:
 
     App\ChainCommandBundle\Service\CommandChainManager:
         arguments:
-            $logger: '@Psr\Log\LoggerInterface'
+            $logger: '@monolog.logger.command_chain'
         public: true
         shared: true
     App\ChainCommandBundle\Service\ExecutedCommandsRegistry:
@@ -45,7 +50,7 @@ services:
         shared: true
     App\ChainCommandBundle\EventListener\CommandChainListener:
         arguments:
-            $logger: '@Psr\Log\LoggerInterface'
+            $logger: '@monolog.logger.command_chain'
             $chainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
         tags:
             - { name: 'kernel.event_listener', event: 'console.command', method: 'onConsoleCommand' }
@@ -54,11 +59,11 @@ services:
     # FooBundle services
     App\FooBundle\Command\FooHelloCommand:
         arguments:
-            $logger: '@Psr\Log\LoggerInterface'
+            $logger: '@monolog.logger.command_chain'
             $registry: '@App\ChainCommandBundle\Service\ExecutedCommandsRegistry'
     # BarBundle services
     App\BarBundle\Command\BarHiCommand:
         arguments:
-            $logger: '@Psr\Log\LoggerInterface'
+            $logger: '@monolog.logger.command_chain'
             $chainManager: '@App\ChainCommandBundle\Service\CommandChainManager'
             $registry: '@App\ChainCommandBundle\Service\ExecutedCommandsRegistry'
