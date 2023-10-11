@@ -1,7 +1,6 @@
 <?php
 namespace App\ChainCommandBundle\EventListener;
 
-use App\ChainCommandBundle\Interface\CommandChainerInterface;
 use App\ChainCommandBundle\Service\CommandChainManager;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
@@ -34,18 +33,18 @@ class CommandChainListener
      *
      * @param ConsoleCommandEvent $event
      */
-    public function onConsoleCommand(ConsoleCommandEvent $event): void
-    {
-        $command = $event->getCommand();
-        $commandName = $command->getName();
-        if ($command instanceof CommandChainerInterface) {
-            foreach ($command->getChainedCommands($commandName) as $chainCommand) {
-                $chainCommand->run($event->getInput(), $event->getOutput());
-            }
-        }
-
-        $this->logger->info(sprintf('Executing %s command...', $commandName));
-    }
+//    public function onConsoleCommand(ConsoleCommandEvent $event): void
+//    {
+//        $command = $event->getCommand();
+//        $commandName = $command->getName();
+//        if ($command instanceof CommandChainerInterface) {
+//            foreach ($command->getChainedCommands($commandName) as $chainCommand) {
+//                $chainCommand->run($event->getInput(), $event->getOutput());
+//            }
+//        }
+//
+//        $this->logger->info(sprintf('Executing %s command...', $commandName));
+//    }
 
     /**
      * Handle the command after its execution.
@@ -54,7 +53,6 @@ class CommandChainListener
      */
     public function onConsoleTerminate(ConsoleTerminateEvent $event): void
     {
-        $commandName = $event->getCommand()->getName();
         $commandName = get_class($event->getCommand());
         $chainedCommands = $this->chainManager->getChainedCommands($commandName);
 

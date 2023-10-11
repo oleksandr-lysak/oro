@@ -25,7 +25,7 @@ class BarHiCommand extends Command implements CommandChainerInterface
      */
     private LoggerInterface $logger;
 
-    protected static $defaultName = 'bar:hi';
+
 
     private $registry;
 
@@ -49,7 +49,7 @@ class BarHiCommand extends Command implements CommandChainerInterface
 
     protected function configure(): void
     {
-        $this->setName($this::$defaultName)->setDescription('Hi from Bar!');
+        $this->setName('bar:hi')->setDescription('Hi from Bar!');
 
     }
 

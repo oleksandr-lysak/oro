@@ -50,7 +50,7 @@ services:
         tags:
             - { name: 'kernel.event_listener', event: 'console.command', method: 'onConsoleCommand' }
             - { name: 'kernel.event_listener', event: 'console.terminate', method: 'onConsoleTerminate' }
-
+        public: true
     # FooBundle services
     App\FooBundle\Command\FooHelloCommand:
         arguments:
